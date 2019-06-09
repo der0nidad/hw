@@ -28,12 +28,12 @@ namespace hw
             {
                 Console.WriteLine(ex.Message);
             }
-            catch (System.InvalidOperationException ex)
+            catch (InvalidOperationException ex)
             {
                 Console.WriteLine("Exception! Wrong database connection string: {0}", connectionString);
                 Console.WriteLine(ex.Message);
             }
-            catch (System.ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 Console.WriteLine("Exception! Wrong database connection string: {0}", connectionString);
                 Console.WriteLine(ex.Message);
@@ -42,29 +42,27 @@ namespace hw
 
         public void Log(string message)
         {
-            if (conn.State == ConnectionState.Open)
+            if (conn.State != ConnectionState.Open) return;
+            DateTime dt = DateTime.Now;
+            SQLiteCommand cmd = conn.CreateCommand();
+            string appName = AppDomain.CurrentDomain.FriendlyName;
+
+
+            string sqlCommand = "INSERT INTO EventLogs(CreationDateTime, Message, ApplicationName, Server) "
+                                 + "VALUES (@datetime, @msg, @application_name, @host_name);";
+
+            cmd.CommandText = sqlCommand;
+            cmd.Parameters.AddWithValue("@datetime", dt);
+            cmd.Parameters.AddWithValue("@msg", message);
+            cmd.Parameters.AddWithValue("@application_name", appName);
+            cmd.Parameters.AddWithValue("@host_name", Environment.MachineName);
+            try
             {
-                DateTime dt = DateTime.Now;
-                SQLiteCommand cmd = conn.CreateCommand();
-                string app_name = System.AppDomain.CurrentDomain.FriendlyName;
-
-
-                string sql_command = "INSERT INTO EventLogs(CreationDateTime, Message, ApplicationName, Server) "
-                                     + "VALUES (@datetime, @msg, @application_name, @host_name);";
-
-                cmd.CommandText = sql_command;
-                cmd.Parameters.AddWithValue("@datetime", dt);
-                cmd.Parameters.AddWithValue("@msg", message);
-                cmd.Parameters.AddWithValue("@application_name", app_name);
-                cmd.Parameters.AddWithValue("@host_name", System.Environment.MachineName);
-                try
-                {
-                    cmd.ExecuteNonQuery();
-                }
-                catch (SQLiteException ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+                cmd.ExecuteNonQuery();
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
