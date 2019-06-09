@@ -7,13 +7,20 @@ namespace hw
     {
         static void Main(string[] args)
         {
-            foreach (var arg in args)
+            string connString = "Data Source=filename.db; Version=3;";
+            if (args.Length == 2)
             {
-                Console.WriteLine(arg);
+                if (args[0] == "-conn-string")
+                {
+                    connString = args[1];
+                }
             }
+
             Logger lg = new Logger();
-            lg.Init();
-            lg.Log("my first msg");
+            lg.Init(connString);
+            lg.Log("раз");
+            lg.Log("два");
+            lg.Log("три");
             Console.WriteLine("we good");
         }
     }
